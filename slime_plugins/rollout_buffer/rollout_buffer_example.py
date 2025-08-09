@@ -11,6 +11,7 @@ from slime.ray.buffer import Buffer
 from slime.utils.async_utils import run
 from slime.utils.mask_utils import MultiTurnLossMaskGenerator
 from slime.utils.types import Sample
+from slime.utils.tensorboard_utils import log_to_tensorboard
 
 __all__ = ["generate_rollout"]
 
@@ -124,6 +125,8 @@ def log_raw_info(args, all_meta_info, rollout_id):
                             // args.global_batch_size
                         )
                         wandb.log(log_dict)
+                    if args.use_tensorboard:
+                        log_to_tensorboard(dict(log_dict))
                     print(f"no filter rollout log {rollout_id}: {log_dict}")
                 except Exception as e:
                     print(f"Failed to log to wandb: {e}")

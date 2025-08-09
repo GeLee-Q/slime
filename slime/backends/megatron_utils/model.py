@@ -18,6 +18,7 @@ from megatron.training.global_vars import get_args
 from megatron.training.training import get_model
 
 import wandb
+from slime.utils.tensorboard_utils import log_to_tensorboard
 from slime.utils.memory_utils import clear_memory
 
 from .checkpoint import load_checkpoint, save_checkpoint
@@ -469,6 +470,8 @@ def train(rollout_id, model, optimizer, opt_param_scheduler, data_iterator, num_
             if args.use_wandb:
                 log_dict["train/step"] = accumulated_step_id
                 wandb.log(log_dict)
+            if args.use_tensorboard:
+                log_to_tensorboard({"train/step": accumulated_step_id, **log_dict})
 
             print(f"step {accumulated_step_id}: {log_dict}")
     # Close out pre-hooks if using distributed optimizer and overlapped param gather.

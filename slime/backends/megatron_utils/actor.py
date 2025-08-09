@@ -17,6 +17,7 @@ from slime.ray.ppo_actor import TrainRayActor
 from slime.utils.memory_utils import clear_memory, print_memory
 from slime.utils.timer import Timer, timer
 from slime.utils.wandb_utils import init_wandb_secondary
+from slime.utils.tensorboard_utils import init_tensorboard_secondary
 
 from ..utils.data import process_rollout_data
 from .checkpoint import load_checkpoint
@@ -39,6 +40,7 @@ class MegatronTrainRayActor(TrainRayActor):
 
         if is_megatron_main_rank():
             init_wandb_secondary(args, wandb_run_id)
+            init_tensorboard_secondary(args)
 
         # read config and tokenizer serialized to prevent concurrent writing bug.
         for i in range(dist.get_world_size()):

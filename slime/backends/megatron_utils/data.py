@@ -10,6 +10,7 @@ from megatron.core.packed_seq_params import PackedSeqParams
 from megatron.core.utils import get_model_config
 
 import wandb
+from slime.utils.tensorboard_utils import log_to_tensorboard
 from slime.utils.flops_utils import calculate_fwd_flops
 from slime.utils.seqlen_balancing import get_seqlen_balanced_partitions
 from slime.utils.timer import Timer
@@ -205,6 +206,11 @@ def log_rollout_data(rollout_id, args, rollout_data):
                     else rollout_id * args.rollout_batch_size * args.n_samples_per_prompt // args.global_batch_size
                 )
                 wandb.log(reduced_log_dict)
+            if args.use_tensorboard:
+                # ensure step captured for TB
+                tb_dict = dict(reduced_log_dict)
+                tb_dict.setdefault("rollout/step", rollout_id)
+                log_to_tensorboard(tb_dict)
         else:
             dist.gather_object(
                 log_dict,
@@ -267,6 +273,8 @@ def log_multi_turn_data(rollout_id, args, rollout_data):
             print(f"multi_turn {rollout_id}: {reduced_log_dict}")
             if args.use_wandb:
                 wandb.log(reduced_log_dict)
+            if args.use_tensorboard:
+                log_to_tensorboard(reduced_log_dict)
         else:
             dist.gather_object(
                 log_dict,
@@ -330,6 +338,8 @@ def log_passrate(rollout_id, args, rollout_data):
             print(f"passrate {rollout_id}: {reduced_log_dict}")
             if args.use_wandb:
                 wandb.log(reduced_log_dict)
+            if args.use_tensorboard:
+                log_to_tensorboard(reduced_log_dict)
         else:
             dist.gather_object(
                 log_dict,
@@ -364,6 +374,10 @@ def log_eval_data(rollout_id, args, rollout_data_ref):
                 else rollout_id * args.rollout_batch_size * args.n_samples_per_prompt // args.global_batch_size
             )
             wandb.log(log_dict)
+        if args.use_tensorboard:
+            tb_dict = dict(log_dict)
+            tb_dict.setdefault("eval/step", rollout_id)
+            log_to_tensorboard(tb_dict)
 
 
 def log_perf_data(rollout_id, args):
@@ -402,4 +416,8 @@ def log_perf_data(rollout_id, args):
                 else rollout_id * args.rollout_batch_size * args.n_samples_per_prompt // args.global_batch_size
             )
             wandb.log(log_dict)
+        if args.use_tensorboard:
+            tb_dict = dict(log_dict)
+            tb_dict.setdefault("rollout/step", rollout_id)
+            log_to_tensorboard(tb_dict)
     timer_instance.reset()

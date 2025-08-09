@@ -10,6 +10,7 @@ from slime.utils.types import Sample
 from slime.ray.rollout_data_source import RolloutDataSource
 from slime.utils.ray_utils import Box
 from slime.utils.wandb_utils import init_wandb_secondary
+from slime.utils.tensorboard_utils import init_tensorboard_secondary
 
 logging.getLogger("httpx").setLevel(logging.WARNING)
 logging.getLogger("httpcore").setLevel(logging.WARNING)
@@ -27,6 +28,7 @@ class Buffer:
     def __init__(self, args, wandb_run_id):
         self.args = args
         init_wandb_secondary(args, wandb_run_id)
+        init_tensorboard_secondary(args)
 
         self.data_source = RolloutDataSource(args)
 
